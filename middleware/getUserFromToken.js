@@ -1,4 +1,4 @@
-import { getUserById } from "#db/queries/users";
+import db from "#db/client";
 import { verifyToken } from "#utils/jwt";
 
 /** Attaches the user to the request if a valid token is provided */
@@ -9,7 +9,9 @@ export default async function getUserFromToken(req, res, next) {
   const token = authorization.split(" ")[1];
   try {
     const { id } = verifyToken(token);
-    const user = await getUserById(id);
+    const {
+      rows: [user],
+    } = await db.query("SELECT * FROM users WHERE id = $1", [id]);
     req.user = user;
     next();
   } catch (e) {
